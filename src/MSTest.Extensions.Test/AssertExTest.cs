@@ -66,6 +66,51 @@
                 Assert.AreEqual(string.Format("AssertEx.Throws に失敗しました。<{0}>が必要ですが、<{1}>が指定されました。", typeof(ApplicationException).FullName, typeof(DivideByZeroException).FullName), ex.Message);
             }
         }
-        
+
+        /// <summary>
+        /// AssertEx.AreEqual 
+        /// 正常系
+        /// </summary>
+        [TestMethod]
+        public void AreEqualTest1()
+        {
+            TestData expected = new TestData { Name = "Hoge", Age = 10 };
+            TestData actual   = new TestData { Name = "Hoge", Age = 10 };
+
+            AssertEx.AreEqual(expected, actual, "Name");
+            AssertEx.AreEqual(expected, actual, "Age");
+        }
+
+        /// <summary>
+        /// AssertEx.AreEqual 
+        /// 正常系
+        /// </summary>
+        [TestMethod]
+        public void AreEqualTest2()
+        {
+            TestData expected = new TestData { Name = "Hoge", Age = 10 };
+            TestData actual   = new TestData { Name = "Hoge", Age = 10 };
+
+            AssertEx.AreEqual(expected, actual, t => t.Name);
+            AssertEx.AreEqual(expected, actual, t => t.Age);
+        }
+
+        /// <summary>
+        /// AreEqual検証用
+        /// </summary>
+        public class TestData
+        {
+            public string Name
+            {
+                get;
+                set;
+            }
+
+            public int Age
+            {
+                get;
+                set;
+            }
+        }
     }
 }

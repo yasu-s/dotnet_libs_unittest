@@ -3,8 +3,10 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     /// <summary>
@@ -40,5 +42,56 @@
             }
         }
 
+        /// <summary>
+        /// 等値演算子を使用して、指定した 2 つのオブジェクトのプロパティ値が等しいことを確認します。<br />
+        /// これらが同一でない場合、アサーションは失敗します。
+        /// </summary>
+        /// <typeparam name="T">検証対象のオブジェクトの型</typeparam>
+        /// <param name="expected">予測値</param>
+        /// <param name="actual">実測値</param>
+        /// <param name="propertyName">検証対象のプロパティ名</param>
+        public static void AreEqual<T>(T expected, T actual, string propertyName)
+        {
+            var propInfo      = typeof(T).GetProperty(propertyName);
+            var expectedValue = propInfo.GetValue(expected);
+            var actualValue   = propInfo.GetValue(actual);
+
+            if (!object.Equals(expectedValue, actualValue))
+                throw new AssertFailedException(string.Format("AssertEx.Throws に失敗しました。<{0}>が必要ですが、<{1}>が指定されました。", expectedValue, actualValue));
+        }
+
+        /// <summary>
+        /// 等値演算子を使用して、指定した 2 つのオブジェクトのプロパティ値が等しいことを確認します。<br />
+        /// これらが同一でない場合、アサーションは失敗します。
+        /// </summary>
+        /// <typeparam name="T">検証対象のオブジェクトの型</typeparam>
+        /// <param name="expected">予測値</param>
+        /// <param name="actual">実測値</param>
+        /// <param name="propertyName">検証対象のプロパティ名</param>
+        public static void AreEqual<T>(T expected, T actual, Expression<Func<T, object>> property)
+        {
+            var member = FindProperty(property);
+            AreEqual(expected, actual, member.Name);
+        }
+
+        /// <summary>
+        /// プロパティ検索処理
+        /// </summary>
+        /// <param name="exp"></param>
+        /// <returns></returns>
+        private static MemberInfo FindProperty(Expression exp)
+        {
+            switch (exp.NodeType)
+            {
+                case ExpressionType.MemberAccess:
+                    return ((MemberExpression)exp).Member;
+                case ExpressionType.Lambda:
+                    return FindProperty(((LambdaExpression)exp).Body);
+                case ExpressionType.Convert:
+                    return FindProperty(((UnaryExpression)exp).Operand);
+                default:
+                    throw new ArgumentException();
+            }
+        }
     }
 }
